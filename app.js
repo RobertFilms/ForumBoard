@@ -4,15 +4,11 @@ const app = express();
 const path = require('path');
 const { join } = require('path');
 const sql = require('sqlite3');
-const session = require('express-session');
 const crypto = require('crypto');
-const http = require('http');
-const { Server } = require('socket.io');
+const session = require('express-session');
+const server = require('http').createServer(app);
 
 const PORT = process.env.PORT || 3000;
-
-const server = http.createServer(app);
-const io = new Server(server);
 
 app.use(express.urlencoded({ extended: true }));
 app.set('view engine', 'ejs');
@@ -35,6 +31,14 @@ app.get('/', isAuthed, (req, res) => {
 
 app.get('/login', (req, res) => {
     res.render('login');
+});
+
+app.get('/profile', isAuthed, (req, res) => {
+    res.render('profile');
+});
+
+app.post('/', (req, res) => {
+    
 });
 
 app.post('/login', (req, res) => {
@@ -75,23 +79,13 @@ const db = new sql.Database('data/data.db', (err) => {
     if (err) {
         console.error(err);
     } else {
-        console.log('Opened database');
+        console.log('Opened all tables');
     }
 });
 
-//SERVER CODE STARTS HERE
+function update() {
 
-//Socket.io
-io.on('connection', (socket) => {
-    console.log(`User ${socket.id} connected`);
-
-
-    socket.on('disconnect', () => {
-        console.log(`User ${socket.id} disconnected`);
-    });
-});
-
-//CLIENT CODE ENDS HERE
+};
 
 server.listen(PORT, () => {
     console.log(`Server started on port:${PORT}`);
