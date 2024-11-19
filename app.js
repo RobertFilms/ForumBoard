@@ -79,11 +79,19 @@ const db = new sql.Database('data/data.db', (err) => {
     }
 });
 
-//SERVER GAME CODE STARTS HERE
+//SERVER CODE STARTS HERE
+
+//Socket.io
+io.on('connection', (socket) => {
+    console.log(`User ${socket.id} connected`);
 
 
+    socket.on('disconnect', () => {
+        console.log(`User ${socket.id} disconnected`);
+    });
+});
 
-//GAME CODE ENDS HERE
+//CLIENT CODE ENDS HERE
 
 server.listen(PORT, () => {
     console.log(`Server started on port:${PORT}`);
