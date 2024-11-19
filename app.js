@@ -46,18 +46,19 @@ app.get('/profile', isAuthed, (req, res) => {
 app.post('/login', (req, res) => {
     if (req.body.username && req.body.password) {
         db.get('SELECT * FROM users WHERE username = ?; ', req.body.username, (err, row) => {
-            if (err) res.render('/login', { message: 'An error occured' });
+            if (err) res.render('/login', { message: 'An error occurred' });
             else if (!row) {
                 const SALT = crypto.randomBytes(16).toString('hex');
                 crypto.pbkdf2(req.body.password, SALT, 1000, 64, 'sha512', (err, derivedKey) => {
                     if (err) res.redirect('/login');
                     else {
                         const hashPassword = derivedKey.toString('hex');
-                        db.run('INSERT INTO users (username, password, salt) VALUES (?, ?, ?);', [req.body.username, hashPassword, SALT], (err) => {
-                            if (err) res.send('An error occured:\n' + err);
+                        const joinDate = new Date().toISOString();
+                        db.run('INSERT INTO users (username, password, salt, date) VALUES (?, ?, ?, ?);', [req.body.username, hashPassword, SALT, joinDate], (err) => {
+                            if (err) res.send('An error occurred:\n' + err);
                             else {
                                 res.redirect('/login');
-                            };
+                            }
                         });
                     }
                 });
@@ -76,7 +77,7 @@ app.post('/login', (req, res) => {
         });
     }
 
-    //Update all the ids and stuff frfr
+    // Update all the ids and stuff frfr
     db.run('UPDATE posts SET poster_id = (SELECT uid FROM users WHERE username = ?), convo_id = (SELECT uid FROM convo WHERE uid = ?);', [req.body.username, req.body.convo_uid], (err) => {
         if (err) {
             console.log(err);

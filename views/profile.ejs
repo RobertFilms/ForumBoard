@@ -47,6 +47,7 @@
         a {
             display: inline-block;
             padding: 0.5rem 1rem;
+            text-align: center;
             background-color: #8722a0;
             color: white;
             text-decoration: none;
@@ -67,19 +68,32 @@
     </header>
     <main>
         <section>
+            <h2>Actions</h2>
+            <a href="/">Forum</a>
+            <a href="/login">Login</a>
+        </section>
+        <section>
             <h2>Profile Information</h2>
             <p><strong>Username:</strong>
                 <%= user.username %>
             </p>
-            <p><strong>Joined:</strong>
-                <%= user.joined %>
+            <p><strong>Date Joined:</strong>
+                <%= user.date %> 
+            </p>
+            <p><strong>UID:</strong>
+                <%= user.uid %>
             </p>
         </section>
-        <section>
-            <h2>Actions</h2>
-            <a href="/">Go to chat</a>
-        </section>
+    <section>
+        <h2>Messages</h2>
+        <ul>
+            /*PUT ALL MESSAGES HERE*/
+        </ul>
+    </section>
     </main>
 </body>
+
+<script>
+</script>
 
 </html>
