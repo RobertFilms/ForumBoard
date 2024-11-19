@@ -34,11 +34,13 @@ app.get('/login', (req, res) => {
 });
 
 app.get('/profile', isAuthed, (req, res) => {
-    res.render('profile');
-});
-
-app.post('/', (req, res) => {
-    
+    db.get('SELECT * FROM users WHERE username = ?', [req.session.user], (err, row) => {
+        if (err) {
+            res.send('An error occurred');
+        } else {
+            res.render('profile', { user: row });
+        }
+    });
 });
 
 app.post('/login', (req, res) => {
@@ -73,6 +75,15 @@ app.post('/login', (req, res) => {
             }
         });
     }
+
+    //Update all the ids and stuff frfr
+    db.run('UPDATE posts SET poster_id = (SELECT uid FROM users WHERE username = ?), convo_id = (SELECT uid FROM convo WHERE uid = ?);', [req.body.username, req.body.convo_uid], (err) => {
+        if (err) {
+            console.log(err);
+        } else {
+            console.log('Updated post');
+        }
+    });
 });
 
 const db = new sql.Database('data/data.db', (err) => {
@@ -82,10 +93,6 @@ const db = new sql.Database('data/data.db', (err) => {
         console.log('Opened all tables');
     }
 });
-
-function update() {
-
-};
 
 server.listen(PORT, () => {
     console.log(`Server started on port:${PORT}`);
