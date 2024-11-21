@@ -4,48 +4,9 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>SmithIT Forum</title>
-    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
-    <style>
-        body {
-            font-family: 'Roboto', sans-serif;
-            background: linear-gradient(135deg, #a72cd8, #5900ff);
-            display: flex;
-            margin: 0;
-            padding: 0;
-        }
-        .forum-container {
-            background-color: #52107e;
-            padding: 30px;
-            border-radius: 10px;
-            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
-            width: 350px;
-            margin: 20px auto;
-            text-align: center;
-        }
-        .forum-header h1 {
-            margin-bottom: 20px;
-            color: #ffffff;
-            font-size: 24px;
-            transition: color 0.3s;
-        }
-        .forum-header h1:hover {
-            color: #ffffff;
-        }
-        .Talkie-Place-one {
-            color: white;
-            background-color: #52107e;
-        }
-        #form { background: rgba(0, 0, 0, 0.15); padding: 0.25rem; position: fixed; bottom: 0; left: 0; right: 0; display: flex; height: 3rem; box-sizing: border-box; backdrop-filter: blur(10px); }
-      #input { border: none; padding: 0 1rem; flex-grow: 1; border-radius: 2rem; margin: 0.25rem; }
-      #input:focus { outline: none; }
-      #form > button { background: #333; border: none; padding: 0 1rem; margin: 0.25rem; border-radius: 3px; outline: none; color: #fff; }
-
-      #messages { list-style-type: none; margin: 0; padding: 0; }
-      #messages > li { padding: 0.5rem 1rem; }
-      #messages > li:nth-child(odd) { background: #efefef; }
-    </style>
+    <link rel="stylesheet" href="public/css/style.css">
 </head>
-<body>
+<body id="indexBod">
     <div class="container forum-container">
         <div class="forum-header">
             <h1>Smithit Forum</h1>
@@ -55,6 +16,8 @@
     <form id="form" action="">
       <input id="input" autocomplete="off" /><button>Send</button>
     </form>
-    <div class="Talkie-Place-one"></div>
+    <div class="Talkie-Place-one">
+        <h1>Talkie place One</h1>
+    </div>
 </body>
 </html>
