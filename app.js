@@ -47,6 +47,14 @@ app.get('/talk1', (req, res) => {
     res.render('talk1');
 });
 
+app.get('/talkTuah', (req, res) => {
+    res.render('talkTuah');
+});
+
+app.get('/Help', (req, res) => {
+    res.render('Help');
+});
+
 app.post('/login', (req, res) => {
     if (req.body.username && req.body.password) {
         db.get('SELECT * FROM users WHERE username = ?; ', req.body.username, (err, row) => {
