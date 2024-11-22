@@ -6,7 +6,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Profile</title>
     <style>
-        body {
+        #profileBod {
             font-family: Arial, sans-serif;
             background-color: #39223a;
             margin: 0;
@@ -31,6 +31,7 @@
         h1 {
             color: #ffffff;
         }
+
         h2 {
             color: #000000;
         }
@@ -59,10 +60,9 @@
             background-color: #d334d8;
         }
     </style>
-
 </head>
 
-<body>
+<body id="profileBod">
     <header>
         <h1>Welcome, <%= user.username %>!</h1>
     </header>
