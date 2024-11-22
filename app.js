@@ -55,6 +55,36 @@ app.get('/Help', (req, res) => {
     res.render('Help');
 });
 
+app.post('/talk1', (req, res) => {
+    db.run('INSERT INTO convo (title) VALUES (?)', ['talk1'], (err) => {
+        if (err) {
+            res.send('An error occurred');
+        } else {
+            res.redirect('/talk1');
+        }
+    });
+});
+
+app.post('/talkTuah', (req, res) => {
+    db.run('INSERT INTO convo (title) VALUES (?)', ['talkTuah'], (err) => {
+        if (err) {
+            res.send('An error occurred');
+        } else {
+            res.redirect('/talkTuah');
+        }
+    });
+});
+
+app.post('/Help', (req, res) => {
+    db.run('INSERT INTO convo (title) VALUES (?)', ['Help'], (err) => {
+        if (err) {
+            res.send('An error occurred');
+        } else {
+            res.redirect('/Help');
+        }
+    });
+});
+
 app.post('/login', (req, res) => {
     if (req.body.username && req.body.password) {
         db.get('SELECT * FROM users WHERE username = ?; ', req.body.username, (err, row) => {
