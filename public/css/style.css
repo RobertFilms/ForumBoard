@@ -8,7 +8,7 @@
 }
 
 .forum-container {
-    background-color: #52107e;
+    background-color: #7b0d9c;
     padding: 30px;
     border-radius: 10px;
     box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
@@ -29,11 +29,15 @@
 }
 
 .Talkie-Place-one {
-    color: white;
-    background-color: #52107e;
+    background: rgba(255, 255, 255, 0.836);
+    /* padding: 0.25rem; */
     position: absolute;
-    left: 50%;
-    top: 25;
+    margin-top: auto;
+    top: 20%;
+    right: 45%;
+    display: flex;
+    height: 3rem;
+    box-sizing: border-box;
 }
 
 #form {
