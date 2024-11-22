@@ -77,14 +77,7 @@ app.post('/login', (req, res) => {
         });
     }
 
-    // Update all the ids and stuff frfr
-    db.run('UPDATE posts SET poster_id = (SELECT uid FROM users WHERE username = ?), convo_id = (SELECT uid FROM convo WHERE uid = ?);', [req.body.username, req.body.convo_uid], (err) => {
-        if (err) {
-            console.log(err);
-        } else {
-            console.log('Updated post');
-        }
-    });
+    //Update all the ids and stuff frfr
 });
 
 const db = new sql.Database('data/data.db', (err) => {
