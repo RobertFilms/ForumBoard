@@ -3,14 +3,16 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>
-        Help Form
-    </title>
+    <title>Help Form</title>
 </head>
 <body>
     <h1>What do you need help with?</h1>
-    <ul id="messages" action="post"></ul>
-    <form id="form" action="">
-        <input id="input" autocomplete="off" /><button>Send</button>
+    <ul id="messages"></ul>
+    <form id="form" action="/submit-help" method="post">
+        <input id="input" autocomplete="off" /><button type="submit">Send</button>
+    </form>
 </body>
 </html>
+<script>
+    //SEND DATA TO SERVER HERE
+</script></script>
