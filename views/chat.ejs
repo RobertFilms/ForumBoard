@@ -1,0 +1,228 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Chat</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #121212;
+            color: #e0e0e0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
+        }
+
+        #chat-container {
+            width: 60%;
+            max-width: 800px;
+            min-width: 300px;
+            background: #1e1e1e;
+            border-radius: 8px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.5);
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+        }
+
+        #chat {
+            border-bottom: 1px solid #333;
+            padding: 20px;
+            height: 400px;
+            overflow-y: scroll;
+            flex-grow: 1;
+            background: #1e1e1e;
+            scrollbar-width: none;
+        }
+
+        #chat::-webkit-scrollbar {
+            display: none;
+        }
+
+        input[type="text"] {
+            flex: 1;
+            padding: 10px;
+            font-size: 16px;
+            border: 1px solid #333;
+            border-radius: 4px;
+            margin-right: 10px;
+            background: #333;
+            color: #e0e0e0;
+        }
+
+        button {
+            padding: 10px 20px;
+            font-size: 16px;
+            border: none;
+            background: #007bff;
+            color: #fff;
+            border-radius: 4px;
+            cursor: pointer;
+            transition: background 0.3s;
+        }
+
+        button:hover {
+            background: #0056b3;
+        }
+
+        #list {
+            width: 30%;
+            background: #1e1e1e;
+            border-radius: 8px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.5);
+            margin-bottom: 20px;
+            padding: 10px;
+            position: absolute;
+            top: 20px;
+            left: 20px;
+        }
+
+        #userList {
+            list-style: none;
+            padding: 0;
+            margin: 0;
+        }
+
+        #userList li {
+            padding: 10px;
+            background: #333;
+            margin-bottom: 5px;
+            border-radius: 4px;
+            display: flex;
+            align-items: center;
+        }
+
+        #userList li:last-child {
+            margin-bottom: 0;
+        }
+
+        #message-container {
+            display: flex;
+            width: 100%;
+            padding: 10px;
+            background: #1e1e1e;
+            border-top: 1px solid #333;
+        }
+
+        #message-container input[type="text"] {
+            flex: 1;
+            padding: 10px;
+            font-size: 16px;
+            border: 1px solid #333;
+            border-radius: 4px;
+            margin-right: 10px;
+            background: #333;
+            color: #e0e0e0;
+        }
+
+        #message-container button {
+            padding: 10px 20px;
+            font-size: 16px;
+            border: none;
+            background: #007bff;
+            color: #fff;
+            border-radius: 4px;
+            cursor: pointer;
+            transition: background 0.3s;
+        }
+
+        #message-container button:hover {
+            background: #0056b3;
+        }
+
+        .message {
+            padding: 10px;
+            margin-bottom: 10px;
+            border-radius: 4px;
+            background: #333;
+        }
+
+        .message span {
+            font-weight: bold;
+            color: #007bff;
+        }
+    </style>
+</head>
+
+<body>
+    <div id="list">
+        <ul id="userList">
+        </ul>
+    </div>
+    <div id="chat-container">
+        <div id="chat">
+        </div>
+        <div id="message-container">
+            <input type="text" id="mess" placeholder="Type your message here" required>
+            <button type="button" id="send">Send</button>
+        </div>
+    </div>
+</body>
+<script>
+    // Create a new WebSocket
+    let ws = new WebSocket("ws://localhost:3000");
+
+    // VARs
+    let tempName = `<%= name %>`;
+    let chat = document.getElementById('chat');
+    let msgBox = document.getElementById('mess');
+    let butt = document.getElementById('send');
+    let userList = document.getElementById('userList');
+    let list = document.getElementById('list');
+
+    // Send message
+    ws.onopen = function () {
+        ws.send(JSON.stringify({ name: tempName }));
+    };
+
+    //On message
+    ws.onmessage = function (message) {
+        const data = JSON.parse(message.data);
+
+        // Check if the message contains a 'list' property
+        if (data.hasOwnProperty('list')) {
+            userData(data.list);
+        }
+
+        // Check if the message contains a 'text' property
+        if (data.hasOwnProperty('text')) {
+            addMessage(data.name, data.text);
+        }
+    };
+
+    //SUPPER AWESOME SIGMA EVENT LISTENER
+    butt.addEventListener('click', (event) => {
+        let messages = msgBox.value;
+        msgBox.value = '';
+        ws.send(JSON.stringify({ name: tempName, text: messages }));
+    });
+
+    //Functions
+    function userData(list) {
+        userList.innerHTML = '';
+
+        for (let i = 0; i < list.length; i++) {
+            let li = document.createElement('li');
+            li.textContent = list[i];
+            userList.appendChild(li);
+        };
+    };
+
+    function addMessage(name, messages) {
+        console.log(name, messages);
+        let div = document.createElement('div');
+        //Add class to div
+        div.classList.add('message');
+        //Add content to div
+        div.innerHTML = `<span>${name}:</span> ${messages}`;
+        chat.appendChild(div);
+        //Scroll to the bottom
+        chat.scrollTop = chat.scrollHeight;
+    };
+</script>
+
+</html>

@@ -1,135 +1,99 @@
-//SO MUCH CONSTS
+//Base stuff frfr
 const express = require('express');
 const app = express();
-const path = require('path');
-const { join } = require('path');
-const sql = require('sqlite3');
-const crypto = require('crypto');
-const session = require('express-session');
-const server = require('http').createServer(app);
 
-const PORT = process.env.PORT || 3000;
+//WebSocket
+const WebSocket = require('ws');
+const http = require('http').Server(app);
+const wss = new WebSocket.Server({ server: http });
 
-app.use(express.urlencoded({ extended: true }));
+//Start thge srever
+http.listen(3000, () => { console.log(`Server started on http://localhost:3000`); });
+
+//EJS settings
 app.set('view engine', 'ejs');
-app.use('/public', express.static(path.join(__dirname, 'public')));
 
-app.use(session({
-    secret: 'LookAtMeImTheSecretNow',
-    resave: false,
-    saveUninitialized: false
-}));
+//Express settings
+app.use(express.json());
+app.use(express.urlencoded({ extended: true }));
 
-function isAuthed(req, res, next) {
-    if (req.session.user) next();
-    else res.redirect('/login');
-}
+//View folder frfr jon
+app.set('views', __dirname + '/views');
 
-app.get('/', isAuthed, (req, res) => {
-    res.render(join('index'));
-});
+//WebSocket connection
+wss.on('connection', (ws) => {
+    console.log(`New usser connected`);
 
-app.get('/login', (req, res) => {
-    res.render('login');
-});
+    ws.on('message', (message) => {
+        message = JSON.parse(String(message));
 
-app.get('/profile', isAuthed, (req, res) => {
-    db.get('SELECT * FROM users WHERE username = ?', [req.session.user], (err, row) => {
-        if (err) {
-            res.send('An error occurred');
-        } else {
-            res.render('profile', { user: row });
-        }
+        if (message.hasOwnProperty('name')) {
+            ws.name = message.name;
+            broadcast(wss, { list: userList(wss).list });
+        };
+
+        if (message.hasOwnProperty('text')) {
+            broadcast(wss, message);
+        };
+    });
+
+    //When user leaves
+    ws.on('close', () => {
+        //This is the user that left
+        broadcast(wss, { list: userList(wss).list });
     });
 });
 
-app.get('/talk1', (req, res) => {
-    res.render('talk1');
-});
 
-app.get('/talkTuah', (req, res) => {
-    res.render('talkTuah');
-});
+//FUNCTIONS
+function broadcast(wss, message) {
+    //console.log(`>>${message}<<`);
+    for (let client of wss.clients) {
+        client.send(JSON.stringify(message));
+    };
+};
 
-app.get('/Help', (req, res) => {
-    res.render('Help');
-});
-
-app.post('/talk1', (req, res) => {
-    db.run('INSERT INTO convo (title) VALUES (?)', ['talk1'], (err) => {
-        if (err) {
-            res.send('An error occurred');
-        } else {
-            res.redirect('/talk1');
+function userList(wss) {
+    const users = [];
+    //console.log('0');
+    wss.clients.forEach((client) => {
+        //console.log('1');
+        if (client.hasOwnProperty('name')) {
+            users.push(client.name);
+            //console.log(users);
+            //console.log(`${client.name} Debug`);
         }
     });
-});
+    return { list: users };
+};
 
-app.post('/talkTuah', (req, res) => {
-    db.run('INSERT INTO convo (title) VALUES (?)', ['talkTuah'], (err) => {
-        if (err) {
-            res.send('An error occurred');
-        } else {
-            res.redirect('/talkTuah');
-        }
-    });
-});
-
-app.post('/Help', (req, res) => {
-    db.run('INSERT INTO convo (title) VALUES (?)', ['Help'], (err) => {
-        if (err) {
-            res.send('An error occurred');
-        } else {
-            res.redirect('/Help');
-        }
-    });
-});
-
-app.post('/login', (req, res) => {
-    if (req.body.username && req.body.password) {
-        db.get('SELECT * FROM users WHERE username = ?; ', req.body.username, (err, row) => {
-            if (err) res.render('/login', { message: 'An error occurred' });
-            else if (!row) {
-                const SALT = crypto.randomBytes(16).toString('hex');
-                crypto.pbkdf2(req.body.password, SALT, 1000, 64, 'sha512', (err, derivedKey) => {
-                    if (err) res.redirect('/login');
-                    else {
-                        const hashPassword = derivedKey.toString('hex');
-                        const joinDate = new Date().toISOString();
-                        db.run('INSERT INTO users (username, password, salt, date) VALUES (?, ?, ?, ?);', [req.body.username, hashPassword, SALT, joinDate], (err) => {
-                            if (err) res.send('An error occurred:\n' + err);
-                            else {
-                                res.redirect('/login');
-                            }
-                        });
-                    }
-                });
-            } else {
-                crypto.pbkdf2(req.body.password, row.salt, 1000, 64, 'sha512', (err, derivedKey) => {
-                    if (err) res.redirect('/login');
-                    else {
-                        const hashPassword = derivedKey.toString('hex');
-                        if (hashPassword === row.password) {
-                            req.session.user = req.body.username;
-                            res.redirect('/');
-                        } else res.redirect('/login');
-                    }
-                });
-            }
-        });
-    }
-
-    //Update all the ids and stuff frfr
-});
-
-const db = new sql.Database('data/data.db', (err) => {
-    if (err) {
-        console.error(err);
+function nameCheck(req, res, next) {
+    let name = req.query.name;
+    //console.log(name);
+    if (name) {
+        next();
     } else {
-        console.log('Opened all tables');
-    }
+        res.redirect('/');
+    };
+};
+
+//////////////////////////////////////
+//////////////////////////////////////
+//////////////////////////////////////
+//////////////////////////////////////
+//////////////////////////////////////
+
+//App gets
+app.get('/', (req, res) => {
+    res.render('index');
 });
 
-server.listen(PORT, () => {
-    console.log(`Server started on port:${PORT}`);
+app.get('/chat', nameCheck, (req, res) => {
+    const NAME = req.query.name;
+
+    res.render('chat', { name: NAME });
+});
+
+app.get('/users', (req, res) => {
+    res.json(userList(wss));
 });
