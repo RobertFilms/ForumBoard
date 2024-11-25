@@ -1,25 +1,21 @@
-//Base stuff frfr
 const express = require('express');
 const app = express();
-const sqlite3 = require('sqlite3');
-const crypto = require('crypto');
-const session = require('express-session');
 const path = require('path');
-const jwt = require('jsonwebtoken');
+const { join } = require('path');
+const sql = require('sqlite3');
+const session = require('express-session');
+const crypto = require('crypto');
+const http = require('http');
+const { Server } = require('socket.io');
 
-//WebSocket
-const WebSocket = require('ws');
-const http = require('http').Server(app);
-const wss = new WebSocket.Server({ server: http });
+const PORT = process.env.PORT || 3000;
 
-//Open database
-const db = new sqlite3.Database('data/data.db', (err) => {
-    if (err) {
-        console.error('Database opening error: ', err);
-    } else {
-        console.log('Database opened');
-    }
-});
+const server = http.createServer(app);
+const io = new Server(server);
+
+app.use(express.urlencoded({ extended: true }));
+app.set('view engine', 'ejs');
+app.use('/public', express.static(path.join(__dirname, 'public')));
 
 app.use(session({
     secret: 'LookAtMeImTheSecretNow',
@@ -27,140 +23,79 @@ app.use(session({
     saveUninitialized: false
 }));
 
-function isAuthenticated(req, res, next) {
-    if (req.session.user) next()
-    else res.redirect('/')
-};
+function isAuthed(req, res, next) {
+    if (req.session.user) next();
+    else res.redirect('/login');
+}
 
-//Start thge srever
-http.listen(3000, () => { console.log(`Server started on http://localhost:3000`); });
+app.get('/', isAuthed, (req, res) => {
+    const name = req.session.user;
 
-//EJS settings
-app.set('view engine', 'ejs');
-
-//Express settings
-app.use(express.json());
-app.use(express.urlencoded({ extended: true }));
-
-//View folder frfr jon
-app.set('views', __dirname + '/views');
-
-//WebSocket connection
-wss.on('connection', (ws) => {
-    console.log(`New usser connected`);
-
-    ws.on('message', (message) => {
-        message = JSON.parse(String(message));
-
-        if (message.hasOwnProperty('name')) {
-            ws.name = message.name;
-            broadcast(wss, { list: userList(wss).list });
-        };
-
-        if (message.hasOwnProperty('text')) {
-            broadcast(wss, message);
-        };
-    });
-
-    //When user leaves
-    ws.on('close', () => {
-        //This is the user that left
-        broadcast(wss, { list: userList(wss).list });
-    });
+    res.render('index', { name });
 });
 
-
-//FUNCTIONS
-function broadcast(wss, message) {
-    //console.log(`>>${message}<<`);
-    for (let client of wss.clients) {
-        client.send(JSON.stringify(message));
-    };
-};
-
-function userList(wss) {
-    const users = [];
-    //console.log('0');
-    wss.clients.forEach((client) => {
-        //console.log('1');
-        if (client.hasOwnProperty('name')) {
-            users.push(client.name);
-            //console.log(users);
-            //console.log(`${client.name} Debug`);
-        }
-    });
-    return { list: users };
-};
-
-function nameCheck(req, res, next) {
-    let name = req.query.name;
-    //console.log(name);
-    if (name) {
-        next();
-    } else {
-        res.redirect('/');
-    };
-};
-
-//////////////////////////////////////
-//////////////////////////////////////
-//////////////////////////////////////
-//////////////////////////////////////
-//////////////////////////////////////
-
-//App gets
-app.get('/', (req, res) => {
-    res.render('index');
+app.get('/login', (req, res) => {
+    res.render('login');
 });
 
-app.get('/pages', nameCheck, (req, res) => {
-    const NAME = req.query.name;
-
-    res.render('pages', { name: NAME });
+app.get('/chat', isAuthed, (req, res) => {
+    const name = req.session.user;
+    res.render('chat', { name });
 });
 
-app.get('/chat', nameCheck, isAuthenticated, (req, res) => {
-    const NAME = req.query.name;
-
-    res.render('chat', { name: NAME });
+app.get('/help', isAuthed, (req, res) => {
+    const name = req.session.user;
+    res.render('help', { name });
 });
 
-app.get('/help', nameCheck, isAuthenticated, (req, res) => {
-    const NAME = req.query.name;
-
-    res.render('help', { name: NAME });
-});
-
-app.post('/', (req, res) => {
+app.post('/login', (req, res) => {
     if (req.body.username && req.body.password) {
         db.get('SELECT * FROM users WHERE username = ?; ', req.body.username, (err, row) => {
-            if (err) res.redirect('/', { message: 'An error occured' });
+            if (err) res.redirect('/login', { message: 'An error occured' });
             else if (!row) {
                 const SALT = crypto.randomBytes(16).toString('hex');
                 crypto.pbkdf2(req.body.password, SALT, 1000, 64, 'sha512', (err, derivedKey) => {
-                    if (err) res.redirect('/');
+                    if (err) res.redirect('/login');
                     else {
                         const hashPassword = derivedKey.toString('hex');
                         db.run('INSERT INTO users (username, password, salt) VALUES (?, ?, ?);', [req.body.username, hashPassword, SALT], (err) => {
                             if (err) res.send('An error occured:\n' + err);
                             else {
-                                res.redirect('/');
+                                res.redirect('/login');
                             };
                         });
                     }
                 });
             } else {
                 crypto.pbkdf2(req.body.password, row.salt, 1000, 64, 'sha512', (err, derivedKey) => {
-                    if (err) res.redirect('/');
+                    if (err) res.redirect('/login');
                     else {
                         const hashPassword = derivedKey.toString('hex');
                         if (hashPassword === row.password) {
                             req.session.user = req.body.username;
                             res.redirect('/');
-                        } else res.redirect('/');
+                        } else res.redirect('/login');
                     }
                 });
             }
         });
     }
+});
+
+const db = new sql.Database('data/data.db', (err) => {
+    if (err) {
+        console.error(err);
+    } else {
+        console.log('Opened database');
+    }
+});
+
+io.on('connection', (socket) => {
+    //On player connection
+    console.log(`User ${socket.id} connected.`);
+    playerList.push(new Player(socket.id, 0, 0, 50, 50));
+});
+
+server.listen(PORT, () => {
+    console.log(`Server started on port:${PORT}`);
 });

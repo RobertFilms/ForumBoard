@@ -19,10 +19,10 @@
             margin: 0;
         }
         .login-container {
-            background-color: rgba(95, 10, 112, 0.137);
+            background-color: rgba(0, 0, 0, 0.7);
             padding: 40px;
             border-radius: 12px;
-            box-shadow: 0 8px 16px rgba(159, 2, 250, 0.3);
+            box-shadow: 0 8px 16px rgba(0, 0, 0, 0.3);
             text-align: center;
             max-width: 400px;
             width: 100%;
@@ -30,6 +30,10 @@
             flex-direction: column;
             align-items: center;
             animation: fadeIn 1s ease-in-out;
+        }
+        .login-container img {
+            width: 100px;
+            margin-bottom: 20px;
         }
         .login-container h2 {
             margin-bottom: 20px;
@@ -50,15 +54,16 @@
             margin-bottom: 20px;
             border: none;
             border-radius: 4px;
-            background-color: #444;
+            background-color: #333;
             color: #fff;
             font-size: 16px;
-            transition: background-color 0.3s ease;
+            transition: background-color 0.3s ease, box-shadow 0.3s ease;
         }
         .login-container input[type="text"]:focus,
         .login-container input[type="password"]:focus {
-            background-color: #555;
+            background-color: #444;
             outline: none;
+            box-shadow: 0 0 8px rgba(255, 255, 255, 0.3);
         }
         .login-container button {
             width: 100%;
@@ -69,10 +74,26 @@
             color: #fff;
             font-size: 16px;
             cursor: pointer;
-            transition: background-color 0.3s ease;
+            transition: background-color 0.3s ease, box-shadow 0.3s ease;
         }
         .login-container button:hover {
             background-color: #3700b3;
+            box-shadow: 0 0 8px rgba(255, 255, 255, 0.3);
+        }
+        .login-container .links {
+            margin-top: 20px;
+            display: flex;
+            justify-content: space-between;
+            width: 100%;
+        }
+        .login-container .links a {
+            color: #fff;
+            text-decoration: none;
+            font-size: 14px;
+            transition: color 0.3s ease;
+        }
+        .login-container .links a:hover {
+            color: #6200ea;
         }
         @keyframes fadeIn {
             from {
@@ -88,14 +109,20 @@
 </head>
 
 <body>
-    <div class="container">
-        <h1>Choose Forum Page</h1>
-        <a href="/chat?name=<%= name %>&b=2">Chat Forum</a>
-        <a href="/help?name=<%= name %>&b=2">Help Forum</a>
+    <div class="login-container">
+        <h2>Login</h2>
+        <form action="/login" method="POST">
+            <div class="form-group">
+                <label for="username">Username:</label>
+                <input type="text" id="username" name="username" required>
+            </div>
+            <div class="form-group">
+                <label for="password">Password:</label>
+                <input type="password" id="password" name="password" required>
+            </div>
+            <button type="submit">Login</button>
+        </form>
     </div>
 </body>
-
-<script>
-</script>
 
 </html>
