@@ -4,7 +4,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Chat Forum</title>
+    <title>Help Forum</title>
     <style>
         body {
             font-family: Arial, sans-serif;
@@ -17,10 +17,38 @@
             margin: 0;
         }
 
-        #chat-container {
-            width: 60%;
-            max-width: 800px;
+        #forum-container {
+            width: 80%;
+            max-width: 1200px;
             min-width: 300px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        header {
+            width: 100%;
+            text-align: center;
+            padding: 20px;
+            background: #1e1e1e;
+            border-radius: 8px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.5);
+            margin-bottom: 20px;
+        }
+
+        header h1 {
+            margin: 0;
+            color: #007bff;
+        }
+
+        #chat-container {
+            width: 100%;
+            display: flex;
+            justify-content: space-between;
+        }
+
+        #chat {
+            width: 70%;
             background: #1e1e1e;
             border-radius: 8px;
             box-shadow: 0 0 10px rgba(0, 0, 0, 0.5);
@@ -29,7 +57,7 @@
             flex-direction: column;
         }
 
-        #chat {
+        #chat-messages {
             border-bottom: 1px solid #333;
             padding: 20px;
             height: 400px;
@@ -39,65 +67,8 @@
             scrollbar-width: none;
         }
 
-        #chat::-webkit-scrollbar {
+        #chat-messages::-webkit-scrollbar {
             display: none;
-        }
-
-        input[type="text"] {
-            flex: 1;
-            padding: 10px;
-            font-size: 16px;
-            border: 1px solid #333;
-            border-radius: 4px;
-            margin-right: 10px;
-            background: #333;
-            color: #e0e0e0;
-        }
-
-        button {
-            padding: 10px 20px;
-            font-size: 16px;
-            border: none;
-            background: #007bff;
-            color: #fff;
-            border-radius: 4px;
-            cursor: pointer;
-            transition: background 0.3s;
-        }
-
-        button:hover {
-            background: #0056b3;
-        }
-
-        #list {
-            width: 30%;
-            background: #1e1e1e;
-            border-radius: 8px;
-            box-shadow: 0 0 10px rgba(0, 0, 0, 0.5);
-            margin-bottom: 20px;
-            padding: 10px;
-            position: absolute;
-            top: 20px;
-            left: 20px;
-        }
-
-        #userList {
-            list-style: none;
-            padding: 0;
-            margin: 0;
-        }
-
-        #userList li {
-            padding: 10px;
-            background: #333;
-            margin-bottom: 5px;
-            border-radius: 4px;
-            display: flex;
-            align-items: center;
-        }
-
-        #userList li:last-child {
-            margin-bottom: 0;
         }
 
         #message-container {
@@ -134,6 +105,38 @@
             background: #0056b3;
         }
 
+        #user-list {
+            width: 25%;
+            background: #1e1e1e;
+            border-radius: 8px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.5);
+            padding: 10px;
+        }
+
+        #user-list h2 {
+            margin-top: 0;
+            color: #007bff;
+        }
+
+        #userList {
+            list-style: none;
+            padding: 0;
+            margin: 0;
+        }
+
+        #userList li {
+            padding: 10px;
+            background: #333;
+            margin-bottom: 5px;
+            border-radius: 4px;
+            display: flex;
+            align-items: center;
+        }
+
+        #userList li:last-child {
+            margin-bottom: 0;
+        }
+
         .message {
             padding: 10px;
             margin-bottom: 10px;
@@ -149,33 +152,38 @@
 </head>
 
 <body>
-    <div id="list">
-        <ul id="userList">
-        </ul>
-    </div>
-    <div id="chat-container">
-        <div id="chat">
-        </div>
-        <div id="message-container">
-            <input type="text" id="mess" placeholder="Type your message here" required>
-            <button type="button" id="send">Send</button>
+    <div id="forum-container">
+        <header>
+            <h1>Help Forum</h1>
+        </header>
+        <div id="chat-container">
+            <div id="chat">
+                <div id="chat-messages"></div>
+                <div id="message-container">
+                    <input type="text" id="mess" placeholder="Type your message here" required>
+                    <button type="button" id="send">Send</button>
+                </div>
+            </div>
+            <div id="user-list">
+                <h2>Users</h2>
+                <ul id="userList"></ul>
+            </div>
         </div>
     </div>
 </body>
 <script>
-    // Create a new WebSocket
+    //Create a new WebSocket
     let ws = new WebSocket("ws://localhost:3000");
 
-    // VARs
+    //VARs
     let tempName = `<%= name %>`;
-    let page = 'chat';
-    let chat = document.getElementById('chat');
+    let page = 'help';
+    let chat = document.getElementById('chat-messages');
     let msgBox = document.getElementById('mess');
     let butt = document.getElementById('send');
     let userList = document.getElementById('userList');
-    let list = document.getElementById('list');
 
-    // Send message
+    //Send message
     ws.onopen = function () {
         ws.send(JSON.stringify({ name: tempName }));
     };
@@ -184,12 +192,12 @@
     ws.onmessage = function (message) {
         const data = JSON.parse(message.data);
 
-        // Check if the message contains a 'list' property
+        //Check if the message contains a 'list' property
         if (data.hasOwnProperty('list')) {
             userData(data.list);
         }
 
-        // Check if the message contains a 'text' property
+        //Check if the message contains a 'text' property
         if (data.hasOwnProperty('text')) {
             addMessage(data.name, data.text);
         }

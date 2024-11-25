@@ -8,7 +8,8 @@
     <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500&display=swap" rel="stylesheet">
     <style>
         body {
-            background-color: #282c34;
+            background-color: black;
+            background-size: cover;
             color: #ffffff;
             font-family: 'Roboto', sans-serif;
             display: flex;
@@ -18,16 +19,17 @@
             margin: 0;
         }
         .login-container {
-            background-color: rgba(0, 0, 0, 0.8);
+            background-color: rgba(95, 10, 112, 0.137);
             padding: 40px;
             border-radius: 12px;
-            box-shadow: 0 8px 16px rgba(0, 0, 0, 0.3);
+            box-shadow: 0 8px 16px rgba(159, 2, 250, 0.3);
             text-align: center;
             max-width: 400px;
             width: 100%;
             display: flex;
             flex-direction: column;
             align-items: center;
+            animation: fadeIn 1s ease-in-out;
         }
         .login-container h2 {
             margin-bottom: 20px;
@@ -41,7 +43,8 @@
             font-size: 14px;
             width: 100%;
         }
-        .login-container input[type="text"] {
+        .login-container input[type="text"],
+        .login-container input[type="password"] {
             width: 100%;
             padding: 12px;
             margin-bottom: 20px;
@@ -50,6 +53,12 @@
             background-color: #444;
             color: #fff;
             font-size: 16px;
+            transition: background-color 0.3s ease;
+        }
+        .login-container input[type="text"]:focus,
+        .login-container input[type="password"]:focus {
+            background-color: #555;
+            outline: none;
         }
         .login-container button {
             width: 100%;
@@ -65,15 +74,27 @@
         .login-container button:hover {
             background-color: #3700b3;
         }
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(-20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
     </style>
 </head>
 
 <body>
     <div class="login-container">
         <h2>Login</h2>
-        <form action="/chat?name=1&b=2">
+        <form action="/pages">
             <label for="username">Name:</label>
             <input type="text" id="name" name="name" required>
+            <label for="password">Password:</label>
+            <input type="password" id="password" name="password" required>
             <button type="submit">Submit</button>
         </form>
     </div>
