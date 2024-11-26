@@ -105,10 +105,17 @@ let userList = [];
 io.on('connection', (socket) => {
     console.log(`User ${socket.id} connected.`);
 
+    // Send all old messages to the new user
+    db.all('SELECT * FROM posts', (err, rows) => {
+        if (err) {
+            console.log(err);
+        } else {
+            socket.emit('oldMessages', rows);
+        }
+    });
+
     socket.on('join', (data) => {
         userList.push(data.name);
-        //Send that someone joined
-        socket.broadcast.emit('message', { text: `${data.name} has joined the chat.` });
         io.emit('message', { list: userList });
     });
 
@@ -124,11 +131,17 @@ io.on('connection', (socket) => {
                 console.log('Message added to database');
             }
         });
+        db.run('INSERT INTO posts (poster, content, convo_id, time) VALUES (?,?,?,?)', [data.name, data.text, data.page, data.time], (err) => {
+            if (err) console.log(err);
+            else {
+                console.log('Message added to database');
+            }
+        });
     });
 
     socket.on('disconnect', () => {
         console.log(`User ${socket.id} disconnected.`);
-        //This is a bit of a wacky way to remove the user from the list, but it works.
+        // This is a bit of a wacky way to remove the user from the list, but it works.
         userList = userList.filter(user => user !== socket.id);
         io.emit('message', { list: userList });
     });
