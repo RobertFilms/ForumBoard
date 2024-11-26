@@ -38,6 +38,11 @@ app.get('/login', (req, res) => {
     res.render('login');
 });
 
+app.get('/profile', isAuthed, (req, res) => {
+    const name = req.session.user;
+    res.render('profile', { name });
+});
+
 app.get('/chat', isAuthed, (req, res) => {
     const name = req.session.user;
     res.render('chat', { name });
@@ -90,12 +95,41 @@ const db = new sql.Database('data/data.db', (err) => {
     }
 });
 
-io.on('connection', (socket) => {
-    //On player connection
-    console.log(`User ${socket.id} connected.`);
-    playerList.push(new Player(socket.id, 0, 0, 50, 50));
-});
-
 server.listen(PORT, () => {
     console.log(`Server started on port:${PORT}`);
+});
+
+//Socket.io
+let userList = [];
+
+io.on('connection', (socket) => {
+    console.log(`User ${socket.id} connected.`);
+
+    socket.on('join', (data) => {
+        userList.push(data.name);
+        //Send that someone joined
+        socket.broadcast.emit('message', { text: `${data.name} has joined the chat.` });
+        io.emit('message', { list: userList });
+    });
+
+    socket.on('data', (data) => {
+        io.emit('message', { text: data });
+    });
+
+    socket.on('message', (data) => {
+        io.emit('message', { name: data.name, text: data.text });
+        db.run('INSERT INTO convo (title) VALUES (?);', [data.page], (err) => {
+            if (err) console.log(err);
+            else {
+                console.log('Message added to database');
+            }
+        });
+    });
+
+    socket.on('disconnect', () => {
+        console.log(`User ${socket.id} disconnected.`);
+        //This is a bit of a wacky way to remove the user from the list, but it works.
+        userList = userList.filter(user => user !== socket.id);
+        io.emit('message', { list: userList });
+    });
 });

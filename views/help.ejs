@@ -170,71 +170,82 @@
             </div>
         </div>
     </div>
-</body>
-<script>
+    <script src="/socket.io/socket.io.js"></script>
+    <script>
+        //Create a new Socket.IO connection
+        const socket = io();
 
-    //MAKE THIS USE SOCKET.IO NOT WS
+        //VARs
+        let tempName = "<%= name %>";
+        let forumPage = "Help Forum"; // Add the forum page name
+        let chat = document.getElementById('chat-messages');
+        let msgBox = document.getElementById('mess');
+        let butt = document.getElementById('send');
+        let userList = document.getElementById('userList');
 
-    //Create a new WebSocket
-    let ws = new WebSocket("ws://localhost:3000");
+        //Send message
+        socket.emit('join', { name: tempName, page: forumPage });
 
-    //VARs
-    let tempName = `<%= name %>`;
-    let page = 'help';
-    let chat = document.getElementById('chat-messages');
-    let msgBox = document.getElementById('mess');
-    let butt = document.getElementById('send');
-    let userList = document.getElementById('userList');
-
-    //Send message
-    ws.onopen = function () {
-        ws.send(JSON.stringify({ name: tempName }));
-    };
-
-    //On message
-    ws.onmessage = function (message) {
-        const data = JSON.parse(message.data);
-
-        //Check if the message contains a 'list' property
-        if (data.hasOwnProperty('list')) {
+        //Listen for 'join' event to update user list
+        socket.on('join', function (data) {
             userData(data.list);
-        }
+        });
 
-        //Check if the message contains a 'text' property
-        if (data.hasOwnProperty('text')) {
-            addMessage(data.name, data.text);
-        }
-    };
+        //On message
+        socket.on('message', function (data) {
+            //Check if the message contains a 'list' property
+            if (data.hasOwnProperty('list')) {
+                userData(data.list);
+            }
 
-    //SUPPER AWESOME SIGMA EVENT LISTENER
-    butt.addEventListener('click', (event) => {
-        let messages = msgBox.value;
-        msgBox.value = '';
-        ws.send(JSON.stringify({ name: tempName, text: messages }));
-    });
+            //Check if the message contains a 'text' property
+            if (data.hasOwnProperty('text')) {
+                addMessage(data.name, data.text);
+            }
+        });
 
-    //Functions
-    function userData(list) {
-        userList.innerHTML = '';
+        socket.on('data', function (data) {
+            userData(data.list);
+        });
 
-        for (let i = 0; i < list.length; i++) {
-            let li = document.createElement('li');
-            li.textContent = list[i];
-            userList.appendChild(li);
+        //SUPPER AWESOME SIGMA EVENT LISTENER
+        butt.addEventListener('click', (event) => {
+            let messages = msgBox.value;
+            msgBox.value = '';
+            socket.emit('message', { name: tempName, text: messages, page: forumPage });
+        });
+
+        msgBox.addEventListener('keypress', (event) => {
+            if (event.key === 'Enter') {
+                let messages = msgBox.value;
+                msgBox.value = '';
+                socket.emit('message', { name: tempName, text: messages, page: forumPage });
+            }
+        });
+
+        //Functions
+        function userData(list) {
+            userList.innerHTML = '';
+
+            for (let i = 0; i < list.length; i++) {
+                let li = document.createElement('li');
+                li.textContent = list[i];
+                userList.appendChild(li);
+            };
         };
-    };
 
-    function addMessage(name, messages) {
-        console.log(name, messages);
-        let div = document.createElement('div');
-        //Add class to div
-        div.classList.add('message');
-        //Add content to div
-        div.innerHTML = `<span>${name}:</span> ${messages}`;
-        chat.appendChild(div);
-        //Scroll to the bottom
-        chat.scrollTop = chat.scrollHeight;
-    };
-</script>
+        function addMessage(name, messages) {
+            console.log(name, messages);
+            let div = document.createElement('div');
+            //Add class to div
+            div.classList.add('message');
+            //Add content to div
+            div.innerHTML = `<span>${name}:</span> ${messages}`;
+            chat.appendChild(div);
+            //Scroll to the bottom
+            chat.scrollTop = chat.scrollHeight;
+        };
+    </script>
+</body>
 
 </html>
