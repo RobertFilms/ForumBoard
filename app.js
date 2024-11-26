@@ -13,6 +13,10 @@ const PORT = process.env.PORT || 3000;
 const server = http.createServer(app);
 const io = new Server(server);
 
+
+let users = [];
+let messages = [];
+
 app.use(express.urlencoded({ extended: true }));
 app.set('view engine', 'ejs');
 app.use('/public', express.static(path.join(__dirname, 'public')));
@@ -93,8 +97,21 @@ const db = new sql.Database('data/data.db', (err) => {
 io.on('connection', (socket) => {
     //On player connection
     console.log(`User ${socket.id} connected.`);
-    playerList.push(new Player(socket.id, 0, 0, 50, 50));
+    // There is no playerlist to add it to so idk
+    // playerList.push(new Player(socket.id, 0, 0, 50, 50));
 });
+
+socket.on('chat message', (data) => {
+    messages.push(data);
+    io.emit('update messages', messages);
+});
+
+socket.on('disconnect', () => {
+    console.log('user disconnected');
+    users = users.filter(user => user !== socket.username);
+    io.emit('update users', users);
+});
+
 
 server.listen(PORT, () => {
     console.log(`Server started on port:${PORT}`);
