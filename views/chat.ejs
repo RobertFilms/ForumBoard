@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+<!-- <!DOCTYPE html>
 <html lang="en">
 
 <head>
@@ -161,72 +161,236 @@
             <button type="button" id="send">Send</button>
         </div>
     </div>
-</body>
+    <script src="/socket.io/socket.io.js"></script>
 <script>
+  var socket = io();
 
-    //DO SOCKET.IO NOT WS
+  var form = document.getElementById('form');
+  var input = document.getElementById('input');
 
-    // Create a new WebSocket
-    let ws = new WebSocket("ws://localhost:3000");
+  form.addEventListener('submit', function(e) {
+    e.preventDefault();
+    if (input.value) {
+      socket.emit('chat message', input.value);
+      input.value = '';
+    }
+  });
 
-    // VARs
-    let tempName = `<%= name %>`;
-    let page = 'chat';
-    let chat = document.getElementById('chat');
-    let msgBox = document.getElementById('mess');
-    let butt = document.getElementById('send');
-    let userList = document.getElementById('userList');
-    let list = document.getElementById('list');
+  io.on('connection', (socket) => {
+  socket.on('chat message', (msg) => {
+    console.log('message: ' + msg);
+  });
+});
 
-    // Send message
-    ws.onopen = function () {
-        ws.send(JSON.stringify({ name: tempName }));
-    };
-
-    //On message
-    ws.onmessage = function (message) {
-        const data = JSON.parse(message.data);
-
-        // Check if the message contains a 'list' property
-        if (data.hasOwnProperty('list')) {
-            userData(data.list);
-        }
-
-        // Check if the message contains a 'text' property
-        if (data.hasOwnProperty('text')) {
-            addMessage(data.name, data.text);
-        }
-    };
-
-    //SUPPER AWESOME SIGMA EVENT LISTENER
-    butt.addEventListener('click', (event) => {
-        let messages = msgBox.value;
-        msgBox.value = '';
-        ws.send(JSON.stringify({ name: tempName, text: messages }));
-    });
-
-    //Functions
-    function userData(list) {
-        userList.innerHTML = '';
-
-        for (let i = 0; i < list.length; i++) {
-            let li = document.createElement('li');
-            li.textContent = list[i];
-            userList.appendChild(li);
-        };
-    };
-
-    function addMessage(name, messages) {
-        console.log(name, messages);
-        let div = document.createElement('div');
-        //Add class to div
-        div.classList.add('message');
-        //Add content to div
-        div.innerHTML = `<span>${name}:</span> ${messages}`;
-        chat.appendChild(div);
-        //Scroll to the bottom
-        chat.scrollTop = chat.scrollHeight;
-    };
+io.on('connection', (socket) => {
+  socket.broadcast.emit('hi');
+});
 </script>
+</body> -->
 
+
+
+
+
+
+
+<!-- <script>
+
+//     //WS code in case needed
+
+//     // Create a new WebSocket
+//     let ws = new WebSocket("ws://localhost:3000");
+
+//     // VARs
+//     let tempName = `<%= name %>`;
+//     let page = 'chat';
+//     let chat = document.getElementById('chat');
+//     let msgBox = document.getElementById('mess');
+//     let butt = document.getElementById('send');
+//     let userList = document.getElementById('userList');
+//     let list = document.getElementById('list');
+
+//     // Send message
+//     ws.onopen = function () {
+//         ws.send(JSON.stringify({ name: tempName }));
+//     };
+
+//     //On message
+//     ws.onmessage = function (message) {
+//         const data = JSON.parse(message.data);
+
+//         // Check if the message contains a 'list' property
+//         if (data.hasOwnProperty('list')) {
+//             userData(data.list);
+//         }
+
+//         // Check if the message contains a 'text' property
+//         if (data.hasOwnProperty('text')) {
+//             addMessage(data.name, data.text);
+//         }
+//     };
+
+//     //SUPPER AWESOME SIGMA EVENT LISTENER
+//     butt.addEventListener('click', (event) => {
+//         let messages = msgBox.value;
+//         msgBox.value = '';
+//         ws.send(JSON.stringify({ name: tempName, text: messages }));
+//     });
+
+//     //Functions
+//     function userData(list) {
+//         userList.innerHTML = '';
+
+//         for (let i = 0; i < list.length; i++) {
+//             let li = document.createElement('li');
+//             li.textContent = list[i];
+//             userList.appendChild(li);
+//         };
+//     };
+
+//     function addMessage(name, messages) {
+//         console.log(name, messages);
+//         let div = document.createElement('div');
+//         //Add class to div
+//         div.classList.add('message');
+//         //Add content to div
+//         div.innerHTML = `<span>${name}:</span> ${messages}`;
+//         chat.appendChild(div);
+//         //Scroll to the bottom
+//         chat.scrollTop = chat.scrollHeight;
+//     };
+// </script> -->
+<!-- </html> -->
+
+
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Chat</title>
+    <style>
+        html, body {
+            margin: 0;
+            padding: 0;
+            height: 100%;
+        }
+        
+        body {
+            display: flex;
+            flex-direction: row;
+            height: 100vh;
+        }
+
+        .chatbox {
+            flex: 1;
+            background-color: white;
+            display: flex;
+            flex-direction: column;
+            justify-content: flex-end;
+        }
+
+        .input-container {
+            display: flex;
+            width: 100%;
+            padding: 10px;
+            box-sizing: border-box;
+        }
+
+        .messagebox {
+            flex: 1;
+            height: 30px;
+        }
+
+        .user-list {
+            width: 10%;
+            background-color: grey;
+            display: flex;
+            flex-direction: column;
+            padding: 10px;
+            box-sizing: border-box;
+        }
+
+        li {
+            list-style-type: none;
+            color: black;
+            margin-bottom: 5px;
+        }
+
+        li p {
+            padding: 0;
+            margin: 0;
+        }
+    </style>
+</head>
+<body>
+    <div class="chatbox">
+        <ul id="messages-list">
+            <!-- Messages will go here -->
+        </ul>
+        <div class="input-container">
+            <input class="messagebox" id="messageInput">
+            <button id="sendButton" onclick="send()">Send</button>
+        </div>
+    </div>
+
+    <div class="user-list">
+        <ul id="user-list">
+            <li>
+                <p>Users:</p>
+            </li>
+        </ul>
+    </div>
+
+    <script src="/socket.io/socket.io.js"></script>
+    <script>
+        const socket = io();  // Connect to the Socket.io server
+        const name = "<%= username %>";
+
+        // Emit the name when the user connects
+        socket.emit('new user', name);
+
+        // Send a new message to the server
+        function send() {
+            const textElement = document.getElementById("messageInput");
+            const text = textElement.value;
+            textElement.value = "";
+
+            // Emit the chat message to the server
+            socket.emit('chat message', {
+                name,
+                text
+            });
+        }
+
+        // Listen for updates to the user list
+        socket.on('update users', (users) => {
+            const userList = document.getElementById("user-list");
+            userList.innerHTML = "<li><p>Users:</p></li>";
+
+            for (const user of users) {
+                const li = document.createElement("li");
+                const p = document.createElement("p");
+                p.textContent = user;
+                li.appendChild(p);
+                userList.appendChild(li);
+            }
+        });
+
+        // Listen for updates to the message list
+        socket.on('update messages', (messages) => {
+            const messageList = document.getElementById("messages-list");
+            messageList.innerHTML = "";  // Clear existing messages
+
+            for (const message of messages) {
+                const li = document.createElement("li");
+                const p = document.createElement("p");
+                p.textContent = `${message.name}: ${message.text}`;
+                li.appendChild(p);
+                messageList.appendChild(li);
+            }
+        });
+    </script>
+</body>
 </html>
