@@ -4,23 +4,75 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Chat Forum</title>
+    <title>chat Forum</title>
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&display=swap" rel="stylesheet">
     <style>
         body {
-            font-family: Arial, sans-serif;
+            font-family: 'Roboto', sans-serif;
             background-color: #121212;
             color: #e0e0e0;
             display: flex;
-            justify-content: center;
+            overflow: hidden;
+            flex-direction: column;
             align-items: center;
             height: 100vh;
             margin: 0;
         }
 
-        #chat-container {
-            width: 60%;
-            max-width: 800px;
+        nav {
+            width: 100%;
+            background: #1e1e1e;
+            padding: 10px 20px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.5);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        nav a {
+            color: #007bff;
+            text-decoration: none;
+            font-weight: 500;
+            transition: color 0.3s;
+        }
+
+        nav a:hover {
+            color: #0056b3;
+        }
+
+        #forum-container {
+            width: 80%;
+            max-width: 1200px;
             min-width: 300px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            margin-top: 20px;
+        }
+
+        header {
+            width: 100%;
+            text-align: center;
+            padding: 20px;
+            background: #1e1e1e;
+            border-radius: 8px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.5);
+            margin-bottom: 20px;
+        }
+
+        header h1 {
+            margin: 0;
+            color: #007bff;
+        }
+
+        #chat-container {
+            width: 100%;
+            display: flex;
+            justify-content: space-between;
+        }
+
+        #chat {
+            width: 70%;
             background: #1e1e1e;
             border-radius: 8px;
             box-shadow: 0 0 10px rgba(0, 0, 0, 0.5);
@@ -29,7 +81,7 @@
             flex-direction: column;
         }
 
-        #chat {
+        #chat-messages {
             border-bottom: 1px solid #333;
             padding: 20px;
             height: 400px;
@@ -39,65 +91,8 @@
             scrollbar-width: none;
         }
 
-        #chat::-webkit-scrollbar {
+        #chat-messages::-webkit-scrollbar {
             display: none;
-        }
-
-        input[type="text"] {
-            flex: 1;
-            padding: 10px;
-            font-size: 16px;
-            border: 1px solid #333;
-            border-radius: 4px;
-            margin-right: 10px;
-            background: #333;
-            color: #e0e0e0;
-        }
-
-        button {
-            padding: 10px 20px;
-            font-size: 16px;
-            border: none;
-            background: #007bff;
-            color: #fff;
-            border-radius: 4px;
-            cursor: pointer;
-            transition: background 0.3s;
-        }
-
-        button:hover {
-            background: #0056b3;
-        }
-
-        #list {
-            width: 30%;
-            background: #1e1e1e;
-            border-radius: 8px;
-            box-shadow: 0 0 10px rgba(0, 0, 0, 0.5);
-            margin-bottom: 20px;
-            padding: 10px;
-            position: absolute;
-            top: 20px;
-            left: 20px;
-        }
-
-        #userList {
-            list-style: none;
-            padding: 0;
-            margin: 0;
-        }
-
-        #userList li {
-            padding: 10px;
-            background: #333;
-            margin-bottom: 5px;
-            border-radius: 4px;
-            display: flex;
-            align-items: center;
-        }
-
-        #userList li:last-child {
-            margin-bottom: 0;
         }
 
         #message-container {
@@ -134,6 +129,43 @@
             background: #0056b3;
         }
 
+        #user-list {
+            width: 25%;
+            background: #1e1e1e;
+            border-radius: 8px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.5);
+            padding: 10px;
+        }
+
+        #user-list h2 {
+            margin-top: 0;
+            color: #007bff;
+        }
+
+        #userList {
+            list-style: none;
+            padding: 0;
+            margin: 0;
+        }
+
+        #userList li {
+            padding: 10px;
+            background: #333;
+            margin-bottom: 5px;
+            border-radius: 4px;
+            display: flex;
+            align-items: center;
+            transition: background 0.3s;
+        }
+
+        #userList li:hover {
+            background: #444;
+        }
+
+        #userList li:last-child {
+            margin-bottom: 0;
+        }
+
         .message {
             padding: 10px;
             margin-bottom: 10px;
@@ -149,84 +181,97 @@
 </head>
 
 <body>
-    <div id="list">
-        <ul id="userList">
-        </ul>
-    </div>
-    <div id="chat-container">
-        <div id="chat">
+    <nav>
+        <a href="/">Home</a>
+        <a href="/login">Login</a>
+    </nav>
+    <header>
+        <h1>chat Forum</h1>
+    </header>
+    <div id="forum-container">
+        <div id="chat-container">
+            <div id="chat">
+                <div id="chat-messages"></div>
+                <div id="message-container">
+                    <input type="text" id="mess" placeholder="Type your message here" required>
+                    <button type="button" id="send">Send</button>
+                </div>
+            </div>
         </div>
-        <div id="message-container">
-            <input type="text" id="mess" placeholder="Type your message here" required>
-            <button type="button" id="send">Send</button>
-        </div>
     </div>
-</body>
-<script>
+    <script src="/socket.io/socket.io.js"></script>
+    <script>
+        // Create a new Socket.IO connection
+        const socket = io();
 
-    //DO SOCKET.IO NOT WS
+        // VARs
+        let tempName = "<%= name %>";
+        let forumPage = "chat Forum";
+        let chat = document.getElementById('chat-messages');
+        let msgBox = document.getElementById('mess');
+        let butt = document.getElementById('send');
+        let userList = document.getElementById('userList');
 
-    // Create a new WebSocket
-    let ws = new WebSocket("ws://localhost:3000");
+        // Send message
+        socket.emit('join', { name: tempName, page: forumPage });
 
-    // VARs
-    let tempName = `<%= name %>`;
-    let page = 'chat';
-    let chat = document.getElementById('chat');
-    let msgBox = document.getElementById('mess');
-    let butt = document.getElementById('send');
-    let userList = document.getElementById('userList');
-    let list = document.getElementById('list');
-
-    // Send message
-    ws.onopen = function () {
-        ws.send(JSON.stringify({ name: tempName }));
-    };
-
-    //On message
-    ws.onmessage = function (message) {
-        const data = JSON.parse(message.data);
-
-        // Check if the message contains a 'list' property
-        if (data.hasOwnProperty('list')) {
+        // Listen for 'join' event to update user list
+        socket.on('join', function (data) {
             userData(data.list);
-        }
+        });
 
-        // Check if the message contains a 'text' property
-        if (data.hasOwnProperty('text')) {
-            addMessage(data.name, data.text);
-        }
-    };
+        // Listen for 'oldMessages' event to display old messages
+        socket.on('oldMessages', function (messages) {
+            messages.forEach(message => {
+                addMessage(message.poster, message.content, message.time);
+            });
+        });
 
-    //SUPPER AWESOME SIGMA EVENT LISTENER
-    butt.addEventListener('click', (event) => {
-        let messages = msgBox.value;
-        msgBox.value = '';
-        ws.send(JSON.stringify({ name: tempName, text: messages }));
-    });
+        // On message
+        socket.on('message', function (data) {
+            // Check if the message contains a 'list' property
+            if (data.hasOwnProperty('list')) {
+                userData(data.list);
+            }
 
-    //Functions
-    function userData(list) {
-        userList.innerHTML = '';
+            // Check if the message contains a 'text' property
+            if (data.hasOwnProperty('text')) {
+                addMessage(data.name, data.text, data.time);
+            }
+        });
 
-        for (let i = 0; i < list.length; i++) {
-            let li = document.createElement('li');
-            li.textContent = list[i];
-            userList.appendChild(li);
+        socket.on('data', function (data) {
+            userData(data.list);
+        });
+
+        // SUPPER AWESOME SIGMA EVENT LISTENER
+        butt.addEventListener('click', (event) => {
+            let messages = msgBox.value;
+            msgBox.value = '';
+            socket.emit('message', { name: tempName, text: messages, page: forumPage, time: new Date().toLocaleTimeString() });
+        });
+
+        msgBox.addEventListener('keypress', (event) => {
+            if (event.key === 'Enter') {
+                let messages = msgBox.value;
+                msgBox.value = '';
+                socket.emit('message', { name: tempName, text: messages, page: forumPage, time: new Date().toLocaleTimeString() });
+            }
+        });
+
+        // Functions
+        function addMessage(name, messages, time) {
+            console.log(name, messages, time);
+            let div = document.createElement('div');
+            // Add class to div
+            div.classList.add('message');
+            // Add content to div
+            div.innerHTML = `<span>${name}:</span> ${messages} <span style="float:right; font-size:0.8em; color:#ccc;">${new Date().toLocaleTimeString()}</span>`;
+            chat.appendChild(div);
+            // Scroll to the bottom
+            chat.scrollTop = chat.scrollHeight;
         };
-    };
-
-    function addMessage(name, messages) {
-        console.log(name, messages);
-        let div = document.createElement('div');
-        //Add class to div
-        div.classList.add('message');
-        //Add content to div
-        div.innerHTML = `<span>${name}:</span> ${messages}`;
-        chat.appendChild(div);
-        //Scroll to the bottom
-        chat.scrollTop = chat.scrollHeight;
-    };
-</script>
+    </script>
+</body>
 
 </html>

@@ -30,7 +30,6 @@ function isAuthed(req, res, next) {
 
 app.get('/', isAuthed, (req, res) => {
     const name = req.session.user;
-
     res.render('index', { name });
 });
 
@@ -40,7 +39,13 @@ app.get('/login', (req, res) => {
 
 app.get('/profile', isAuthed, (req, res) => {
     const name = req.session.user;
-    res.render('profile', { name });
+    db.get('SELECT * FROM users WHERE username = ?', [name], (err, row) => {
+        if (err) {
+            res.send('An error occurred');
+        } else {
+            res.render('profile', { user: row });
+        }
+    });
 });
 
 app.get('/chat', isAuthed, (req, res) => {
@@ -56,7 +61,7 @@ app.get('/help', isAuthed, (req, res) => {
 app.post('/login', (req, res) => {
     if (req.body.username && req.body.password) {
         db.get('SELECT * FROM users WHERE username = ?; ', req.body.username, (err, row) => {
-            if (err) res.redirect('/login', { message: 'An error occured' });
+            if (err) res.redirect('/login', { message: 'An error occurred' });
             else if (!row) {
                 const SALT = crypto.randomBytes(16).toString('hex');
                 crypto.pbkdf2(req.body.password, SALT, 1000, 64, 'sha512', (err, derivedKey) => {
@@ -64,7 +69,7 @@ app.post('/login', (req, res) => {
                     else {
                         const hashPassword = derivedKey.toString('hex');
                         db.run('INSERT INTO users (username, password, salt) VALUES (?, ?, ?);', [req.body.username, hashPassword, SALT], (err) => {
-                            if (err) res.send('An error occured:\n' + err);
+                            if (err) res.send('An error occurred:\n' + err);
                             else {
                                 res.redirect('/login');
                             };
@@ -85,6 +90,19 @@ app.post('/login', (req, res) => {
             }
         });
     }
+});
+
+app.post('/addForum', isAuthed, (req, res) => {
+    const { forumName, forumUrl } = req.body;
+    // Here you can add code to save the new forum to the database or any other storage
+    console.log(`New forum added: ${forumName} - ${forumUrl}`);
+
+    // Dynamically create a new route for the new forum
+    app.get(`/forum/${forumUrl}`, isAuthed, (req, res) => {
+        res.render('forum', { forumName });
+    });
+
+    res.redirect('/');
 });
 
 const db = new sql.Database('data/data.db', (err) => {
